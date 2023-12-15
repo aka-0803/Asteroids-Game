@@ -10,19 +10,34 @@ class Player {
   constructor({ position, velocity }) {
     this.position = position;
     this.velocity = velocity;
+    this.rotation = 0;
   }
   draw() {
-    c.arc(this.position.x,this.position.y,5,0,Math.PI * 2,false)
-    c.fillStyle = 'red'
-    c.fill()
+    c.save();
+    c.translate(this.position.x, this.position.y);
+    c.rotate(this.rotation);
+    c.translate(-this.position.x, -this.position.y);
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, 5, 0, Math.PI * 2, false);
+    c.fillStyle = "red";
+    c.fill();
+    c.closePath();
     // draw the player
-    c.moveTo(this.position.x+30,this.position.y)
-    c.lineTo(this.position.x-10,this.position.y-10)
-    c.lineTo(this.position.x-10,this.position.y+10)
-    c.closePath()
+    c.beginPath();
+    c.moveTo(this.position.x + 30, this.position.y);
+    c.lineTo(this.position.x - 10, this.position.y - 10);
+    c.lineTo(this.position.x - 10, this.position.y + 10);
+    c.closePath();
     // give color or outline to player
-    c.strokeStyle = 'white'
-    c.stroke()// this to be called to exec the above line
+    c.strokeStyle = "white";
+    c.stroke(); // this to be called to exec the above line
+    c.restore();
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
   }
 }
 
@@ -32,3 +47,69 @@ const player = new Player({
 });
 
 player.draw();
+
+const keys = {
+  w: {
+    pressed: false,
+  },
+  a: {
+    pressed: false,
+  },
+  d: {
+    pressed: false,
+  },
+};
+
+const SPEED = 10;
+const ROTATIONAL_SPEED = 0.07;
+const FRICTION = 0.90;
+const PROJECTILE_SPEED = 3;
+
+//add animation
+function animate() {
+  window.requestAnimationFrame(animate); // which func you want to run over over again
+  c.fillStyle = "black";
+  c.fillRect(0, 0, canvas.width, canvas.height);
+  player.update(); // update player position
+  player.velocity.x = 0;
+  player.velocity.y = 0;
+  if (keys.w.pressed) {
+    player.velocity.x = Math.cos(player.rotation) * SPEED;
+    player.velocity.y = Math.sin(player.rotation) * SPEED;
+  } else if (!keys.w.pressed) {
+    player.velocity.x *= FRICTION;
+    player.velocity.y *= FRICTION;
+  }
+  if (keys.d.pressed) player.rotation += ROTATIONAL_SPEED;
+  else if (keys.a.pressed) player.rotation -= ROTATIONAL_SPEED;
+}
+animate();
+// movement of player
+window.addEventListener("keydown", (event) => {
+  switch (event.code) {
+    case "KeyW":
+      keys.w.pressed = true;
+      break;
+    case "KeyA":
+      keys.a.pressed = true;
+      break;
+    case "KeyD":
+      keys.d.pressed = true;
+      break;
+  }
+});
+
+// stop the movement of player
+window.addEventListener("keyup", (event) => {
+  switch (event.code) {
+    case "KeyW":
+      keys.w.pressed = false;
+      break;
+    case "KeyA":
+      keys.a.pressed = false;
+      break;
+    case "KeyD":
+      keys.d.pressed = false;
+      break;
+  }
+});
