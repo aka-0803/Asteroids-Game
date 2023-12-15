@@ -1,2 +1,2 @@
-Asteroids Game
-Retro Asteroids game using HTML Canvas and Javascript
+### Asteroids Game
+**Retro Asteroids game using HTML Canvas and Javascript**
