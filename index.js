@@ -154,6 +154,19 @@ window.setInterval(() => {
   );
 }, 3000);
 
+//collision detection
+function circleCollision(circle1, circle2) {
+  const xDifference = circle2.position.x - circle1.position.x;
+  const yDifference = circle2.position.y - circle1.position.y;
+  const distance = Math.sqrt(
+    Math.pow(xDifference, 2) + Math.pow(yDifference, 2)
+  );
+  if (distance <= circle1.radius + circle2.radius) {
+    return true;
+  }
+  return false;
+}
+
 //add animation
 function animate() {
   window.requestAnimationFrame(animate); // which func you want to run over over again
@@ -181,6 +194,7 @@ function animate() {
   for (let i = asteroids.length - 1; i >= 0; i--) {
     const asteroid = asteroids[i];
     asteroid.update();
+
     // garbage collection for asteroidsd
     if (
       asteroid.position.x + asteroid.radius < 0 ||
@@ -189,6 +203,14 @@ function animate() {
       asteroid.position.y + asteroid.radius < 0
     ) {
       asteroids.splice(i, 1);
+    }
+    //projectiles to remove after collision
+    for (let j = projectiles.length - 1; j >= 0; j--) {
+      const projectile = projectiles[j];
+      if (circleCollision(asteroid, projectile)) {
+        asteroids.splice(i, 1);
+        projectiles.splice(j, 1);
+      }
     }
   }
 
