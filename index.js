@@ -39,6 +39,26 @@ class Player {
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
   }
+
+  getVertices() {
+    const cos = Math.cos(this.rotation);
+    const sin = Math.sin(this.rotation);
+
+    return [
+      {
+        x: this.position.x + cos * 30 - sin * 0,
+        y: this.position.y + sin * 30 + cos * 0,
+      },
+      {
+        x: this.position.x + cos * -10 - sin * 10,
+        y: this.position.y + sin * -10 + cos * 10,
+      },
+      {
+        x: this.position.x + cos * -10 - sin * -10,
+        y: this.position.y + sin * -10 + cos * -10,
+      },
+    ];
+  }
 }
 
 class Projectile {
@@ -109,7 +129,7 @@ const projectiles = [];
 const asteroids = [];
 
 // creating asteroid
-window.setInterval(() => {
+const intervalId = window.setInterval(() => {
   const index = Math.floor(Math.random() * 4);
   let x, y, vx, vy;
   let radius = 50 * Math.random() + 10;
@@ -167,9 +187,55 @@ function circleCollision(circle1, circle2) {
   return false;
 }
 
+function circleTriangleCollision(circle, triangle) {
+  // Check if the circle is colliding with any of the triangle's edges
+  for (let i = 0; i < 3; i++) {
+    let start = triangle[i];
+    let end = triangle[(i + 1) % 3];
+
+    let dx = end.x - start.x;
+    let dy = end.y - start.y;
+    let length = Math.sqrt(dx * dx + dy * dy);
+
+    let dot =
+      ((circle.position.x - start.x) * dx +
+        (circle.position.y - start.y) * dy) /
+      Math.pow(length, 2);
+
+    let closestX = start.x + dot * dx;
+    let closestY = start.y + dot * dy;
+
+    if (!isPointOnLineSegment(closestX, closestY, start, end)) {
+      closestX = closestX < start.x ? start.x : end.x;
+      closestY = closestY < start.y ? start.y : end.y;
+    }
+
+    dx = closestX - circle.position.x;
+    dy = closestY - circle.position.y;
+
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance <= circle.radius) {
+      return true;
+    }
+  }
+
+  // No collision
+  return false;
+}
+
+function isPointOnLineSegment(x, y, start, end) {
+  return (
+    x >= Math.min(start.x, end.x) &&
+    x <= Math.max(start.x, end.x) &&
+    y >= Math.min(start.y, end.y) &&
+    y <= Math.max(start.y, end.y)
+  );
+}
+
 //add animation
 function animate() {
-  window.requestAnimationFrame(animate); // which func you want to run over over again
+  const animationId = window.requestAnimationFrame(animate); // which func you want to run over over again
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -194,6 +260,13 @@ function animate() {
   for (let i = asteroids.length - 1; i >= 0; i--) {
     const asteroid = asteroids[i];
     asteroid.update();
+
+    //check collision between player and asteroid
+    if (circleTriangleCollision(asteroid, player.getVertices())) {
+      console.log("GAME OVER");
+      window.cancelAnimationFrame(animationId);
+      clearInterval(intervalId);
+    }
 
     // garbage collection for asteroidsd
     if (
