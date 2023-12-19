@@ -6,6 +6,8 @@ canvas.height = window.innerHeight;
 c.fillStyle = "black";
 c.fillRect(0, 0, canvas.width, canvas.height);
 
+var score = 0;
+
 class Player {
   constructor({ position, velocity }) {
     this.position = position;
@@ -182,6 +184,7 @@ function circleCollision(circle1, circle2) {
     Math.pow(xDifference, 2) + Math.pow(yDifference, 2)
   );
   if (distance <= circle1.radius + circle2.radius) {
+    score++;
     return true;
   }
   return false;
@@ -233,12 +236,18 @@ function isPointOnLineSegment(x, y, start, end) {
   );
 }
 
+function drawScore() {
+  c.font = "30px Arial";
+  c.fillStyle = "white";
+  c.fillText(`Score: ${score}`, 20, 40);
+}
 //add animation
 function animate() {
   const animationId = window.requestAnimationFrame(animate); // which func you want to run over over again
   c.fillStyle = "black";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
+  drawScore();
   player.update(); // update player position
 
   // for projectile animation
@@ -266,6 +275,8 @@ function animate() {
       console.log("GAME OVER");
       window.cancelAnimationFrame(animationId);
       clearInterval(intervalId);
+      alert("GAME OVER");
+      document.location.reload();
     }
 
     // garbage collection for asteroidsd
