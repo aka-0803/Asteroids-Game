@@ -235,11 +235,18 @@ function isPointOnLineSegment(x, y, start, end) {
     y <= Math.max(start.y, end.y)
   );
 }
-
+// to draw the score
 function drawScore() {
-  c.font = "30px Arial";
+  c.font = "15px Arial";
   c.fillStyle = "white";
-  c.fillText(`Score: ${score}`, 20, 40);
+  c.fillText(`Score: ${score}`, 20, 60);
+}
+var highScore = localStorage.getItem("myhighscore") || 0;
+// to draw the high score
+function drawHighScore() {
+  c.font = "15px Arial";
+  c.fillStyle = "white";
+  c.fillText(`High Score: ${highScore}`, 80, 60);
 }
 //add animation
 function animate() {
@@ -248,6 +255,7 @@ function animate() {
   c.fillRect(0, 0, canvas.width, canvas.height);
 
   drawScore();
+  drawHighScore();
   player.update(); // update player position
 
   // for projectile animation
@@ -273,6 +281,8 @@ function animate() {
     //check collision between player and asteroid
     if (circleTriangleCollision(asteroid, player.getVertices())) {
       console.log("GAME OVER");
+      highScore = Math.max(score, highScore);
+      localStorage.setItem("myhighscore", highScore);
       window.cancelAnimationFrame(animationId);
       clearInterval(intervalId);
       alert("GAME OVER");
